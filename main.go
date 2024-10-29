@@ -24,3 +24,82 @@ type Usuario struct {
 	Carrera    string `json:"carrera"`
 	Semestre   int    `json:"semestre"`
 }
+
+/ Get para proyectos del usuario
+    r.GET("/proyectos/:id_usuario", func(c *gin.Context) {
+        idUsuario, err := strconv.Atoi(c.Param("id_usuario"))
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+            return
+        }
+        proyectos, err := getProyectosByUsuario(db, idUsuario)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        c.JSON(http.StatusOK, proyectos)
+    })
+
+    // Get para proyectos
+    r.GET("/proyectos", func(c *gin.Context) {
+        proyectos, err := getProyectos(db)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        c.JSON(http.StatusOK, proyectos)
+    })
+
+    // Post para proyectos
+    r.POST("/proyectos", func(c *gin.Context) {
+        var nuevoProyecto Proyecto
+        if err := c.ShouldBindJSON(&nuevoProyecto); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        if err := createProyecto(db, &nuevoProyecto); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusCreated, nuevoProyecto)
+    })
+
+    // Put para proyectos
+    r.PUT("/proyectos/:id", func(c *gin.Context) {
+        var proyecto Proyecto
+        if err := c.ShouldBindJSON(&proyecto); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        id, err := strconv.Atoi(c.Param("id"))
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+            return
+        }
+        proyecto.ID = id
+
+        if err := updateProyecto(db, &proyecto); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusOK, proyecto)
+    })
+
+    // Delete para proyectos
+    r.DELETE("/proyectos/:id", func(c *gin.Context) {
+        id, err := strconv.Atoi(c.Param("id"))
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+            return
+        }
+
+        if err := deleteProyecto(db, id); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{"message": "Proyecto eliminado"})
+    })
