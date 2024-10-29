@@ -103,3 +103,43 @@ type Usuario struct {
 
         c.JSON(http.StatusOK, gin.H{"message": "Proyecto eliminado"})
     })
+
+// Post para usuarios
+
+r.POST("/usuarios", func(c *gin.Context) {
+    var nuevoUsuario Usuario
+    if err := c.ShouldBindJSON(&nuevoUsuario); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    if err := createUsuario(db, &nuevoUsuario); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusCreated, nuevoUsuario)
+})
+
+// Post para autenticar usuarios
+r.POST("/auth", func(c *gin.Context) {
+    var credenciales struct {
+        Usuario    string json:"usuario"
+        Contrasena string json:"contrasena"
+    }
+    if err := c.ShouldBindJSON(&credenciales); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    usuario, err := authenticateUsuario(db, credenciales.Usuario, credenciales.Contrasena)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales inválidas"})
+        return
+    }
+
+    c.JSON(http.StatusOK, usuario)
+})
+
+r.Run(":8080") 
+}
