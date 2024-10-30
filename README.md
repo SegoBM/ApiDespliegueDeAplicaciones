@@ -9,6 +9,7 @@ Edgaryitor = Edgar de Jesús Flores Trejo
 Caro-21    = Dinora Carolina Salazar Viera
 
 Pruebas 
+![imagen](https://github.com/user-attachments/assets/7a28d232-57db-4cf7-8407-291e6089c3c7)
 
 
 
